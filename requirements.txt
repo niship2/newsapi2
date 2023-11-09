@@ -3,3 +3,4 @@ numpy
 pandas
 pydeck
 streamlit
+GoogleNews==1.6.10
