@@ -105,7 +105,16 @@ def news_main() -> None:
     with st.expander("Bing News"):
         content = get_bing_news(word=searchword, page=1, time1=start_d, time2=end_d)
         bingnewsdf = pd.DataFrame(content["value"])
-        st.write(bingnewsdf)
+        bingnewsdf["title"] = bingnewsdf["name"]
+        bingnewsdf["link"] = bingnewsdf["url"]
+        st.dataframe(
+            bingnewsdf[["title", "link", "datePublished", "category"]],
+            column_config={
+                "link": st.column_config.LinkColumn("link"),
+            },
+            hide_index=True,
+        )
+
 
     with st.expander("NewsAPI"):
         response = get_newsapi_news(
