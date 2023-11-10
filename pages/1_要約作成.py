@@ -39,7 +39,10 @@ def abst_main():
         hide_index=True,
     )
 
-    if st.button("要約生成"):
+    if st.button("全体要約生成"):
+        st.write("生成記事・・・（工事中）")
+
+    if st.button("各記事一行要約生成"):
         st.write("生成記事・・・（工事中）")
 
 

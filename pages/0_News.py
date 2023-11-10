@@ -115,16 +115,18 @@ def news_main() -> None:
             hide_index=True,
         )
 
-
     with st.expander("NewsAPI"):
-        response = get_newsapi_news(
-            word=searchword,
-            page=1,
-            time1=start_d.strftime(format),
-            time2=end_d.strftime(format),
-        )
-        newsapi_df = pd.DataFrame(json.loads(response.text))
-        st.write(newsapi_df)
+        try:
+            response = get_newsapi_news(
+                word=searchword,
+                page=1,
+                time1=start_d.strftime(format),
+                time2=end_d.strftime(format),
+            )
+            newsapi_df = pd.DataFrame(json.loads(response.text)["articles"])
+            st.write(newsapi_df)
+        except Exception as ex:
+            st.write("データなし" + str(ex))
 
     # format = "%Y-%m-%d"
     # time1 = (datetime.now()).strftime(format)
