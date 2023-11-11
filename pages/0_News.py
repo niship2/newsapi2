@@ -145,7 +145,7 @@ def news_main() -> None:
         ma_selectword = st.selectbox("付加キーワード", ["acquired", "M&A", "IPO"])
         ma_searchword = searchword + " " + ma_selectword
         for sw in [ma_searchword]:
-            st.write("「{}」でのgoogle news".format(sw))
+            st.write("「{}」でのgoogle newsサーチ結果".format(sw))
             result = get_google_news(
                 word=sw,
                 page=1,
@@ -166,7 +166,7 @@ def news_main() -> None:
 
             st.markdown("---")
 
-            st.write("「{}」でのbing news".format(sw))
+            st.write("「{}」でのbing newsサーチ結果".format(sw))
             # bing
             content = get_bing_news(
                 word=funding_searchword,
