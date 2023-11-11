@@ -19,8 +19,8 @@ if "google_newsdf" not in st.session_state:
 if "bing_newsdf" not in st.session_state:
     st.session_state["bing_newsdf"] = pd.DataFrame()
 
-if "newsapi_df" not in st.session_state:
-    st.session_state["newsapi_df"] = pd.DataFrame()
+#if "newsapi_df" not in st.session_state:
+#    st.session_state["newsapi_df"] = pd.DataFrame()
 
 
 @st.cache_data
@@ -42,9 +42,11 @@ def get_newsapi_news(word, page, time1, time2):
 
 @st.cache_data
 def get_google_news(word, page, time1, time2):
-    googlenews = GoogleNews()
+    delta = time2 - time1
+    # st.write(delta.days)
+    googlenews = GoogleNews(period="{}d".format(delta.days))
     googlenews.set_lang("en")
-    googlenews.set_time_range(time1, time2)
+    # googlenews.set_time_range(time1, time2)
     googlenews.set_encode("utf-8")
     googlenews.get_news(word)
 
@@ -59,7 +61,6 @@ def get_bing_news(word, page, time1, time2):
 
     # Query term(s) to search for.
     query = word
-    query2 = word
 
     # Construct a request
     mkt = "en-US"
@@ -78,19 +79,35 @@ def get_bing_news(word, page, time1, time2):
 def news_main() -> None:
     # desig_word = st.text_input("指定検索キーワード", disabled=True, value="Air Capture")
     # additional_word = st.text_input("追加キーワード", placeholder="CO2")
-    searchword = st.text_input("検索語", value="CO2", placeholder="CO2")
+    searchword = st.text_input(
+        "検索語ーカンマ区切りで複数指定可能（複数指定は未実装）",
+        value="Direct Air Capture",
+        placeholder="Cirect Air Capture",
+    )
     # searchword = st.selectbox("検索語指定：", [desig_word, additional_word])
 
     with st.sidebar:
-        st.write("可能な場合日付指定")
+        st.write("日付指定（指定が効かない場合あり）")
         format = "%Y-%m-%d"
+        format2 = "%m/%d/%Y"
         start_d = st.date_input(
-            "開始日", disabled=False, value=datetime.now() - timedelta(days=10)
+            "開始日", disabled=False, value=datetime.now() - timedelta(days=20)
         )
+        # st.write(start_d.strftime("%s"))
         end_d = st.date_input("終了日", disabled=False, value=datetime.now())
 
-    with st.expander("Google News"):
-        result = get_google_news(word=searchword, page=1, time1=start_d, time2=end_d)
+    with st.expander("スタートアップ新規資金調達情報"):
+        # st.write("検索語＆fundingでの検索結果")
+        funding_searchword = searchword + " funding"
+
+        st.write("「{}」でのgoogle news".format(funding_searchword))
+        result = get_google_news(
+            word=funding_searchword,
+            page=1,
+            time1=start_d,
+            time2=end_d,
+        )
+
         google_newsdf = pd.DataFrame(result)
         google_newsdf["link"] = "http://" + google_newsdf["link"]
         # st.data_editor(google_newsdf)
@@ -102,8 +119,15 @@ def news_main() -> None:
             hide_index=True,
         )
 
-    with st.expander("Bing News"):
-        content = get_bing_news(word=searchword, page=1, time1=start_d, time2=end_d)
+        st.markdown("---")
+        st.write("「{}」でのbing news".format(funding_searchword))
+        # bing
+        content = get_bing_news(
+            word=funding_searchword,
+            page=1,
+            time1=start_d.strftime("%s"),
+            time2=end_d.strftime("%s"),
+        )
         bingnewsdf = pd.DataFrame(content["value"])
         bingnewsdf["title"] = bingnewsdf["name"]
         bingnewsdf["link"] = bingnewsdf["url"]
@@ -115,27 +139,94 @@ def news_main() -> None:
             hide_index=True,
         )
 
-    with st.expander("NewsAPI"):
-        try:
-            response = get_newsapi_news(
-                word=searchword,
+    with st.expander("IPO,M&A"):
+        # st.write("検索語＆M&A,検索語＆IPOでの検索結果")
+        ma_searchword = searchword + " M&A"
+        ipo_searchword = searchword + " IPO"
+        for sw in [ma_searchword, ipo_searchword]:
+            st.write("「{}」でのgoogle news".format(sw))
+            result = get_google_news(
+                word=sw,
                 page=1,
-                time1=start_d.strftime(format),
-                time2=end_d.strftime(format),
+                time1=start_d,
+                time2=end_d,
             )
-            newsapi_df = pd.DataFrame(json.loads(response.text)["articles"])
-            st.write(newsapi_df)
-        except Exception as ex:
-            st.write("データなし" + str(ex))
 
-    # format = "%Y-%m-%d"
-    # time1 = (datetime.now()).strftime(format)
-    # time2 = (datetime.now() - timedelta(days=10)).strftime(format)
+            google_newsdf = pd.DataFrame(result)
+            google_newsdf["link"] = "http://" + google_newsdf["link"]
+            # st.data_editor(google_newsdf)
+            st.dataframe(
+                google_newsdf[["title", "link", "datetime", "media"]],
+                column_config={
+                    "link": st.column_config.LinkColumn("link"),
+                },
+                hide_index=True,
+            )
+
+            st.markdown("---")
+
+            st.write("「{}」でのbing news".format(sw))
+            # bing
+            content = get_bing_news(
+                word=funding_searchword,
+                page=1,
+                time1=start_d.strftime("%s"),
+                time2=end_d.strftime("%s"),
+            )
+            bingnewsdf = pd.DataFrame(content["value"])
+            bingnewsdf["title"] = bingnewsdf["name"]
+            bingnewsdf["link"] = bingnewsdf["url"]
+            st.dataframe(
+                bingnewsdf[["title", "link", "datePublished", "category"]],
+                column_config={
+                    "link": st.column_config.LinkColumn("link"),
+                },
+                hide_index=True,
+            )
+
+    with st.expander("業界関連ニュース"):
+        st.write("「{}」でのgoogle news".format(searchword))
+        result = get_google_news(
+            word=searchword,
+            page=1,
+            time1=start_d,
+            time2=end_d,
+        )
+
+        google_newsdf = pd.DataFrame(result)
+        google_newsdf["link"] = "http://" + google_newsdf["link"]
+        # st.data_editor(google_newsdf)
+        st.dataframe(
+            google_newsdf[["title", "link", "datetime", "media"]],
+            column_config={
+                "link": st.column_config.LinkColumn("link"),
+            },
+            hide_index=True,
+        )
+
+        st.markdown("---")
+        st.write("「{}」でのbing news".format(searchword))
+        # bing
+        content = get_bing_news(
+            word=searchword,
+            page=1,
+            time1=start_d.strftime("%s"),
+            time2=end_d.strftime("%s"),
+        )
+        bingnewsdf = pd.DataFrame(content["value"])
+        bingnewsdf["title"] = bingnewsdf["name"]
+        bingnewsdf["link"] = bingnewsdf["url"]
+        st.dataframe(
+            bingnewsdf[["title", "link", "datePublished", "category"]],
+            column_config={
+                "link": st.column_config.LinkColumn("link"),
+            },
+            hide_index=True,
+        )
 
     st.session_state["searchword"] = searchword
     st.session_state["google_newsdf"] = google_newsdf
     st.session_state["bingnewsdf"] = bingnewsdf
-    st.session_state["newsapi_df"] = newsapi_df
 
 
 st.set_page_config(page_title="News", page_icon="📹", layout="wide")
