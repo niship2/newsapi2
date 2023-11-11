@@ -139,7 +139,7 @@ def news_main() -> None:
             hide_index=True,
         )
 
-    with st.expander("IPO,M&A"):
+    with st.expander("IPO,M&A情報"):
         # st.write("検索語＆M&A,検索語＆IPOでの検索結果")
         ma_searchword = searchword + " M&A"
         ipo_searchword = searchword + " IPO"
