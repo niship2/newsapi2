@@ -19,7 +19,7 @@ if "google_newsdf" not in st.session_state:
 if "bing_newsdf" not in st.session_state:
     st.session_state["bing_newsdf"] = pd.DataFrame()
 
-#if "newsapi_df" not in st.session_state:
+# if "newsapi_df" not in st.session_state:
 #    st.session_state["newsapi_df"] = pd.DataFrame()
 
 
@@ -50,7 +50,7 @@ def get_google_news(word, page, time1, time2):
     googlenews.set_encode("utf-8")
     googlenews.get_news(word)
 
-    return googlenews.results()
+    return googlenews.results(sort=True)
 
 
 @st.cache_data
@@ -64,7 +64,7 @@ def get_bing_news(word, page, time1, time2):
 
     # Construct a request
     mkt = "en-US"
-    params = {"q": query, "mkt": mkt, "since": time1}
+    params = {"q": query, "mkt": mkt, "since": time1, "count": 100}
     headers = {"Ocp-Apim-Subscription-Key": subscription_key}
 
     # Call the API
