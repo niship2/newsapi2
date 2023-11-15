@@ -7,6 +7,7 @@ import math
 import json
 import pandas as pd
 import requests
+import time
 
 summary_url = st.secrets["SUMMARY_URL"]
 
@@ -38,11 +39,13 @@ def get_deepl(sentence, target="en"):
     return translated_wordtext
 
 
-def get_summary(url_list, additional_point):
+def get_summary(url_list, additional_point, get_allsummary):
     url = (
         summary_url
         + "?additional_point="
         + str(additional_point)
+        + "&get_allsummary="
+        + get_allsummary
         + "&urls="
         + "|".join(url_list)
     )
@@ -64,9 +67,14 @@ def summary_main():
         "開催概要、注目技術・企業の一般情報以外に、特に抽出したい観点を入力してください。", placeholder="音声認識"
     )
 
-    if st.button("サマリ生成"):
+    get_allsummary = st.selectbox("ソース記事の概要を表示しますか？(余分に時間がかかります)", ("no", "yes"))
+    exec_summmary = st.button("サマリ生成")
+
+    if exec_summmary:
+        time_sta = time.perf_counter()
+
         url_list = input_urls.split("\n")
-        summary_json = get_summary(url_list, additional_point)
+        summary_json = get_summary(url_list, additional_point, get_allsummary)
 
         st.markdown("---")
         st.write("要約生成結果")
@@ -74,11 +82,17 @@ def summary_main():
         st.markdown("---")
 
         with st.expander("ソース文章の概要"):
-            sentence = summary_json["allsummary"]
-            st.write(get_deepl(sentence, target="ja"))
+            if get_allsummary == "no":
+                st.write("省略")
+            else:
+                sentence = summary_json["allsummary"]
+                st.write(get_deepl(sentence, target="ja"))
 
         with st.expander("要約生成のソース文章"):
             st.write(pd.DataFrame(summary_json["sourceinfo"]))
+
+        time_end = time.perf_counter()
+        st.write("処理時間：", time_end - time_sta, "秒")
 
 
 st.set_page_config(page_title="News", page_icon="📹", layout="wide")
