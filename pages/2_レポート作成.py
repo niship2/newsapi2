@@ -56,8 +56,11 @@ def summary_main():
         st.markdown("---")
         st.write("要約生成結果")
         st.markdown(summary_json["answer"])
-
         st.markdown("---")
+
+        with st.expander("ソース文章の概要"):
+            st.write(summary_json["allsummary"])
+
         with st.expander("要約生成のソース文章"):
             st.write(pd.DataFrame(summary_json["sourceinfo"]))
 
