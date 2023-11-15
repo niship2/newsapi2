@@ -12,7 +12,9 @@ if "searchword" not in st.session_state:
     st.session_state["searchword"] = "CO2"
 
 if "google_newsdf" not in st.session_state:
-    st.session_state["google_newsdf"] = pd.DataFrame()
+    columns = ["check", "title", "link", "datetime", "media"]
+    tempdf = pd.DataFrame(columns=columns)
+    st.session_state["google_newsdf"] = tempdf
 
 if "bing_newsdf" not in st.session_state:
     st.session_state["bing_newsdf"] = pd.DataFrame()
