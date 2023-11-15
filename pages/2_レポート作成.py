@@ -47,7 +47,7 @@ def summary_main():
         input_urls = st.text_area("改行区切りでurl指定", sample_url)
 
     additional_point = st.text_input(
-        "開催概要、注目技術・企業の一般情報以外に、特に抽出したい観点を入力してください。", placeholder="自動車、VR"
+        "開催概要、注目技術・企業の一般情報以外に、特に抽出したい観点を入力してください。", placeholder="音声認識"
     )
 
     if st.button("サマリ生成"):
