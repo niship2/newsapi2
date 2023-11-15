@@ -42,7 +42,7 @@ def get_summary(url_list, additional_point):
 
 
 def summary_main():
-    st.write("要約生成対象の記事を選択して「要約生成」ボタンを押してください。")
+    st.write("サマリ対象の記事urlを入力して「サマリ生成」ボタンを押してください。")
     with st.expander("レポート生成対象の記事url入力"):
         input_urls = st.text_area("改行区切りでurl指定", sample_url)
 
@@ -50,7 +50,7 @@ def summary_main():
         "開催概要、注目技術・企業の一般情報以外に、特に抽出したい観点を入力してください。", placeholder="自動車、VR"
     )
 
-    if st.button("要約生成"):
+    if st.button("サマリ生成"):
         url_list = input_urls.split("\n")
         summary_json = get_summary(url_list, additional_point)
 
