@@ -23,7 +23,6 @@ https://ja.kardome.com/blog-posts/kardome-partners-with-knowles-demo-voice-recog
 https://jidounten-lab.com/u_33419"""
 
 
-@st.cache_data
 def get_summary(url_list, additional_point):
     url = (
         summary_url
