@@ -98,7 +98,7 @@ def news_main() -> None:
 
     with st.expander("スタートアップ新規資金調達情報"):
         # st.write("検索語＆fundingでの検索結果")
-        fund_selectword = st.selectbox("付加キーワード", ["raised", "funding", "fund"])
+        fund_selectword = st.selectbox("付加キーワード", ["", "raised", "funding", "fund"])
         funding_searchword = searchword + " " + fund_selectword
 
         st.write("「{}」でのgoogle news".format(funding_searchword))
@@ -142,7 +142,7 @@ def news_main() -> None:
 
     with st.expander("IPO,M&A情報"):
         # st.write("検索語＆M&A,検索語＆IPOでの検索結果")
-        ma_selectword = st.selectbox("付加キーワード", ["acquired", "M&A", "IPO"])
+        ma_selectword = st.selectbox("付加キーワード", ["", "acquired", "M&A", "IPO"])
         ma_searchword = searchword + " " + ma_selectword
         for sw in [ma_searchword]:
             st.write("「{}」でのgoogle newsサーチ結果".format(sw))
