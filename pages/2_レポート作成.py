@@ -23,6 +23,21 @@ https://ja.kardome.com/blog-posts/kardome-partners-with-knowles-demo-voice-recog
 https://jidounten-lab.com/u_33419"""
 
 
+def get_deepl(sentence, target="en"):
+    url = "https://api.deepl.com/v2/translate"
+    auth_key = st.secrets["DEEPL_AUTH_KEY"]
+    request = "{}?auth_key={}&target_lang={}&text={}".format(
+        url, auth_key, target, sentence
+    )
+    try:
+        response = requests.get(request)
+        translated_wordtext = json.loads(response.text)["translations"][0]["text"]
+    except:
+        translated_wordtext = "エラーが発生しました。入力文章を変えてください。"
+
+    return translated_wordtext
+
+
 def get_summary(url_list, additional_point):
     url = (
         summary_url
@@ -59,7 +74,8 @@ def summary_main():
         st.markdown("---")
 
         with st.expander("ソース文章の概要"):
-            st.write(summary_json["allsummary"])
+            sentence = summary_json["allsummary"]
+            st.write(get_deepl(sentence, target="ja"))
 
         with st.expander("要約生成のソース文章"):
             st.write(pd.DataFrame(summary_json["sourceinfo"]))
