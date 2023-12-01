@@ -28,7 +28,7 @@ def abst_main():
     google_newsdf = st.session_state["google_newsdf"]
     google_newsdf["check"] = False
     st.data_editor(
-        google_newsdf[["check", "title", "link", "datetime", "media"]],
+        google_newsdf,
         column_config={
             "check": st.column_config.CheckboxColumn(
                 "生成チェック",
