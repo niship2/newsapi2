@@ -55,37 +55,6 @@ def news_main() -> None:
         # st.write(start_d.strftime("%s"))
         #end_d = st.date_input("終了日", disabled=False, value=datetime.now())        
 
-    task_names = get_taskname_list()
-    
-    with st.expander("スタートアップ新規資金調達情報"):
-        fund_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=["vndaily-news","news-asia-technews","fund-eu-startups"],key="fund")
-        fund_df = get_table(fund_task_name_list)
-        fund_df = fund_df[fund_df["pubdate"].str.contains(time_period)]
-        st.dataframe(
-            fund_df,
-            column_config={
-                "url": st.column_config.LinkColumn("url"),
-            },
-            hide_index=True,
-            use_container_width=True
-        )
-        #components.iframe("https://lookerstudio.google.com/s/qSxFC2WfMzs",height=600)
-
-
-    with st.expander("IPO,M&A情報"):
-        ma_default_list = ["ma-eu-startups","ma-techchurch"]
-        ma_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=ma_default_list,key="ma")
-        ma_df = get_table(ma_task_name_list)
-        ma_df = [ma_df["pubdate"].str.contains(time_period)]
-        st.dataframe(
-            ma_df,
-            column_config={
-                "url": st.column_config.LinkColumn("url"),
-            },
-            hide_index=True,
-            use_container_width=True
-        )
-
     with st.expander("関連ニュース"):
         task_name = st.selectbox("カテゴリ選択",["IT","energy","healthcare","material"])
         with st.form("サーチワード指定"):
@@ -133,7 +102,37 @@ def news_main() -> None:
 
             
         
+    task_names = get_taskname_list()
+    
+    with st.expander("スタートアップ新規資金調達情報"):
+        fund_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=["vndaily-news","news-asia-technews","fund-eu-startups"],key="fund")
+        fund_df = get_table(fund_task_name_list)
+        fund_df = fund_df[fund_df["pubdate"].str.contains(time_period)]
+        st.dataframe(
+            fund_df,
+            column_config={
+                "url": st.column_config.LinkColumn("url"),
+            },
+            hide_index=True,
+            use_container_width=True
+        )
+        #components.iframe("https://lookerstudio.google.com/s/qSxFC2WfMzs",height=600)
 
+
+    with st.expander("IPO,M&A情報"):
+        ma_df = pd.DataFrame()
+        ma_default_list = ["ma-eu-startups","ma-techchurch"]
+        ma_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=ma_default_list,key="ma")
+        ma_df = get_table(ma_task_name_list)
+        ma_df = ma_df[ma_df["pubdate"].str.contains(time_period)]
+        st.dataframe(
+            ma_df,
+            column_config={
+                "url": st.column_config.LinkColumn("url"),
+            },
+            hide_index=True,
+            use_container_width=True
+        )
 
     #st.session_state["searchword"] = task_name
     #st.session_state["google_newsdf"] = gnews_df

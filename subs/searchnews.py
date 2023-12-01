@@ -12,7 +12,7 @@ SERPAPI_API_KEY = st.secrets["SERPAPI_API_KEY"]
 
 def get_date_format(d):
     dt = datetime.today()  # ローカルな現在の日付と時刻を取得
-    if "hours ago" in str(d):
+    if "hours ago" in str(d) or "mins ago" in str(d):
         return dt.date()
     else:
         return str(d)
