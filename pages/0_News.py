@@ -134,6 +134,10 @@ def news_main() -> None:
             use_container_width=True
         )
 
+
+    with st.expander("メルマガから抽出"):
+        st.write("ここに置くか含めて検討中")
+
     #st.session_state["searchword"] = task_name
     #st.session_state["google_newsdf"] = gnews_df
     #st.session_state["bingnewsdf"] = bingnewsdf
