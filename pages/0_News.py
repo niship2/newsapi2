@@ -63,7 +63,7 @@ def news_main() -> None:
             elif task_name == "energy":
                 query = 'CO2 recycle OR EV battery OR carbon foot print energy effiency OR hydrogen fuel cell'
             elif task_name == "healthcare":
-                query = 'Wearable device OR Femtech Application OR Femtech Platform OR Wellness Application OR Wellness Platform OR Diagnosis Devices OR Medical device AI OR "Healthcare digital platform" OR Healthcare next generation platform'
+                query = 'Wearable device OR Femtech Application OR Femtech Platform OR Wellness Application OR Wellness Platform OR Diagnosis Devices OR Medical device AI OR Healthcare digital platform OR Healthcare next generation platform'
             elif task_name == "material":
                 query = 'Biopolymer OR Synthetic OR Fermentation OR Material recycle OR Semiconductor Material OR Nanotechnology Material OR Metal OR Biomaterial OR Chemical OR construction material OR insulation material OR ammonia OR hydrogen OR magnetic OR cement material'
         
@@ -90,7 +90,7 @@ def news_main() -> None:
                 time1 = "2023-12-01"#start_d
         
 
-                bingnewsdf = extract_bing_news(searchword_list,time1=time1)
+                bingnewsdf = extract_bing_news(searchword_list,time_op=time_op)
                 st.write("Bingニュース：{}件hit".format(bingnewsdf.shape[0]))
                 st.dataframe(
                     bingnewsdf,

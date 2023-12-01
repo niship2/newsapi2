@@ -31,7 +31,16 @@ def return_period(nws,time_op):
         else:
             return "d1"
     else:
-        return "-"
+        if time_op=="直近24時間":
+            return "Day"
+        elif time_op == "直近1週間":
+            return "Week"
+        elif time_op == "直近2週間":
+            return "Week"
+        elif time_op == "直近1ヶ月":
+            return "Month"
+        else:
+            return "Day"
     
 
 
@@ -109,28 +118,10 @@ def get_google_news(word, page, time1, time2):
 
 
 
-@st.cache_data
-def get_newsapi_news(word, page, time1, time2):
-    url = (
-        "https://newsapi.org/v2/everything?"
-        "q=" + word + "&"
-        "page=" + str(page) + "&"
-        "from=" + time1 + "&"
-        "to=" + time2 + "&"
-        "domains=techcrunch.com,wired.com,ycombinator.com&"
-        "sortBy=popularity&"
-        "apiKey=" + st.secrets["NEWSAPI_KEY"]
-    )
-
-    response = requests.get(url)
-    return response
-
-
-
 
 
 @st.cache_data
-def get_bing_news(word,time1):
+def get_bing_news(word,time_op):
     # Add your Bing Search V7 subscription key and endpoint to your environment variables.
     subscription_key = st.secrets["BING_SEARCH_V7_SUBSCRIPTION_KEY"]
     endpoint = st.secrets["BING_SEARCH_V7_ENDPOINT"]
@@ -140,7 +131,7 @@ def get_bing_news(word,time1):
     # Construct a request
     mkt = "en-US"
     params = {"q": word, "mkt": mkt, 
-              "freshness":"Day",
+              "freshness":return_period(nws="bing",time_op=time_op),
               #"since": time1, 
               "count": 100,
               "sortBy":"Date"}
@@ -155,12 +146,12 @@ def get_bing_news(word,time1):
         return ex
     
 
-def extract_bing_news(searchword_list,time1):
+def extract_bing_news(searchword_list,time_op):
     bingnewsdf = pd.DataFrame()
     for wd in searchword_list:   
         content = get_bing_news(
             word=wd,
-            time1=time1
+            time_op=time_op
             )
         temp_df = pd.DataFrame(content["value"])
         temp_df["searchword"] = wd
