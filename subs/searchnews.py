@@ -45,7 +45,7 @@ def return_period(nws,time_op):
 
 
 @st.cache_data
-def extract_google_news(searchword_list,time_op):
+def extract_google_news(searchword_list,time_op,additional_word):
 
     time = return_period(nws="google",time_op=time_op)
 
@@ -56,7 +56,7 @@ def extract_google_news(searchword_list,time_op):
         params = {
             "api_key": SERPAPI_API_KEY,
             "engine": "google",
-            "q": wd,
+            "q": wd + " " + additional_word,
             "google_domain": "google.com",
             #"hl": "en",
             "filter":1,
@@ -104,24 +104,10 @@ def extract_google_news(searchword_list,time_op):
 
 
 
-@st.cache_data
-def get_google_news(word, page, time1, time2):
-    delta = time2 - time1
-    # st.write(delta.days)
-    googlenews = GoogleNews(period="{}d".format(delta.days))
-    googlenews.set_lang("en")
-    # googlenews.set_time_range(time1, time2)
-    googlenews.set_encode("utf-8")
-    googlenews.get_news(word)
-
-    return googlenews.results(sort=True)
-
-
-
 
 
 @st.cache_data
-def get_bing_news(word,time_op):
+def get_bing_news(word,time_op,additional_word):
     # Add your Bing Search V7 subscription key and endpoint to your environment variables.
     subscription_key = st.secrets["BING_SEARCH_V7_SUBSCRIPTION_KEY"]
     endpoint = st.secrets["BING_SEARCH_V7_ENDPOINT"]
@@ -130,7 +116,7 @@ def get_bing_news(word,time_op):
 
     # Construct a request
     mkt = "en-US"
-    params = {"q": word, "mkt": mkt, 
+    params = {"q": word + " " + additional_word, "mkt": mkt, 
               "freshness":return_period(nws="bing",time_op=time_op),
               #"since": time1, 
               "count": 100,
@@ -146,17 +132,21 @@ def get_bing_news(word,time_op):
         return ex
     
 
-def extract_bing_news(searchword_list,time_op):
+def extract_bing_news(searchword_list,time_op,additional_word):
     bingnewsdf = pd.DataFrame()
-    for wd in searchword_list:   
-        content = get_bing_news(
+    try:
+        for wd in searchword_list:   
+            content = get_bing_news(
             word=wd,
-            time_op=time_op
+            time_op=time_op,
+            additional_word=additional_word
             )
-        temp_df = pd.DataFrame(content["value"])
-        temp_df["searchword"] = wd
-        temp_df["title"] = temp_df["name"]
-        temp_df["link"] = temp_df["url"]
-        bingnewsdf = pd.concat([bingnewsdf,temp_df])
+            temp_df = pd.DataFrame(content["value"])
+            temp_df["searchword"] = wd
+            temp_df["title"] = temp_df["name"]
+            temp_df["link"] = temp_df["url"]
+            bingnewsdf = pd.concat([bingnewsdf,temp_df])
+    except:
+        pass
 
     return bingnewsdf[["searchword","title","link","description","datePublished"]]
