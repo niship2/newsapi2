@@ -106,9 +106,9 @@ def news_main() -> None:
     task_names = get_taskname_list()
     
     with st.expander("スタートアップ新規資金調達情報"):
-        fund_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=["vndaily-news","news-asia-technews","fund-eu-startups"],key="fund")
+        fund_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=["vndaily-news","news-asia-technews"],key="fund")
         fund_df = get_table(fund_task_name_list)
-        fund_df = fund_df[fund_df["pubdate"].str.contains(time_period)]
+        fund_df = fund_df[fund_df["pubdate"].fillna("-").str.contains(time_period)]
         st.dataframe(
             fund_df,
             column_config={
@@ -122,10 +122,10 @@ def news_main() -> None:
 
     with st.expander("IPO,M&A情報"):
         ma_df = pd.DataFrame()
-        ma_default_list = ["ma-eu-startups","ma-techchurch"]
+        ma_default_list = ["ma-techchurch"]
         ma_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=ma_default_list,key="ma")
         ma_df = get_table(ma_task_name_list)
-        ma_df = ma_df[ma_df["pubdate"].str.contains(time_period)]
+        ma_df = ma_df[ma_df["pubdate"].fillna("-").str.contains(time_period)]
         st.dataframe(
             ma_df,
             column_config={

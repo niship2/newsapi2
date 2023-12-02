@@ -16,6 +16,7 @@ def get_taskname_list():
     query = '''
     SELECT taskname
     FROM `zuba-340305.newsdata.test_newsdata`
+    WHERE NOT REGEXP_CONTAINS(taskname,"eu-startup")
     GROUP BY taskname
     '''
     job_config = bigquery.QueryJobConfig(
@@ -47,6 +48,7 @@ def get_table(task_name):
     STRING_AGG(DISTINCT IFNULL(taskname,"-")) as taskname
         FROM `zuba-340305.newsdata.test_newsdata`
     WHERE taskname IN UNNEST(@task_name_list)
+    AND NOT REGEXP_CONTAINS(taskname,"eu-startup")
     GROUP BY url
     
     '''
