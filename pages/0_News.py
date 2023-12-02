@@ -69,7 +69,7 @@ def news_main() -> None:
         
             all_searchword_list = query.split(" OR ")
             searchword_list = st.multiselect("サーチワード選択",all_searchword_list,default=all_searchword_list[0])
-            additional_word = st.text_input("追加限定ワード",value='"raised"')
+            additional_word = st.text_input("追加限定ワード",value='"raises"')
 
 
             submitted = st.form_submit_button("検索")
