@@ -88,11 +88,9 @@ def news_main() -> None:
 
                 st.markdown("---")
 
-                time1 = "2023-12-01"#start_d
-        
+                st.write("Bingニュース：{}件hit".format(bingnewsdf.shape[0]))
                 try:
                     bingnewsdf = extract_bing_news(searchword_list,time_op,additional_word)
-                    st.write("Bingニュース：{}件hit".format(bingnewsdf.shape[0]))
                     st.dataframe(
                         bingnewsdf,
                         column_config={
