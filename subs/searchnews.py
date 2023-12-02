@@ -142,7 +142,7 @@ def extract_bing_news(searchword_list,time_op,additional_word):
             additional_word=additional_word
             )
             temp_df = pd.DataFrame(content["value"])
-            temp_df["searchword"] = wd
+            temp_df["searchword"] = wd + " " + additional_word
             temp_df["title"] = temp_df["name"]
             temp_df["link"] = temp_df["url"]
             bingnewsdf = pd.concat([bingnewsdf,temp_df])
