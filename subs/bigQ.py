@@ -33,7 +33,6 @@ def get_taskname_list():
     return dataframe
 
 
-
 def get_table(task_name):
     task_name_list = task_name
     query = '''
@@ -69,3 +68,29 @@ def get_table(task_name):
     
     
     return dataframe[["taskname","title","url","pubdate","description"]]
+
+
+@st.cache_data
+def get_newsletter(time_period):
+    query = '''
+    SELECT sender,title,url,received_date 
+    FROM  zuba-340305.newsdata.newsletter
+    ORDER BY received_date DESC
+    '''
+    job_config = bigquery.QueryJobConfig(
+    query_parameters=[
+        bigquery.ArrayQueryParameter("time_period", "STRING",time_period),
+    ]
+    )
+
+    
+    dataframe = (
+    client.query(query, job_config=job_config)
+    .result()
+    .to_dataframe(
+        create_bqstorage_client=True,
+        )
+    )
+    
+    
+    return dataframe

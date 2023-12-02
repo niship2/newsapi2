@@ -13,6 +13,7 @@ from subs.searchnews import extract_google_news
 from subs.searchnews import extract_bing_news
 from subs.bigQ import get_table
 from subs.bigQ import get_taskname_list
+from subs.bigQ import get_newsletter
 
 
 #if "searchword" not in st.session_state:
@@ -138,6 +139,22 @@ def news_main() -> None:
 
     with st.expander("メルマガから抽出"):
         st.write("ここに置くか含めて検討中")
+        newslette_df = get_newsletter(time_period)
+        sourcelist = newslette_df["sender"].unique().tolist()
+        select_source = st.multiselect("from選択",sourcelist,sourcelist[0])
+        filtered_df = (newslette_df[newslette_df["sender"].isin(select_source)]
+                       [newslette_df["received_date"].isin(time_period.split("|"))]
+                       )
+
+        st.dataframe(
+            filtered_df,
+            column_config={
+                "url": st.column_config.LinkColumn("url"),
+            },
+            hide_index=True,
+            use_container_width=True
+        )        
+       
 
     #st.session_state["searchword"] = task_name
     #st.session_state["google_newsdf"] = gnews_df
