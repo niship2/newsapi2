@@ -68,12 +68,13 @@ def news_main() -> None:
                 query = 'Biopolymer OR Synthetic OR Fermentation OR Material recycle OR Semiconductor Material OR Nanotechnology Material OR Metal OR Biomaterial OR Chemical OR construction material OR insulation material OR ammonia OR hydrogen OR magnetic OR cement material'
         
             all_searchword_list = query.split(" OR ")
-            searchword_list = st.multiselect("サーチワード選択",all_searchword_list)
+            searchword_list = st.multiselect("サーチワード選択",all_searchword_list,default=all_searchword_list[0])
+            additional_word = st.text_input("追加限定ワード",value='"raised"')
 
 
             submitted = st.form_submit_button("検索")
             if submitted:        
-                gnews_df = extract_google_news(searchword_list,time_op)
+                gnews_df = extract_google_news(searchword_list,time_op,additional_word)
                 st.write("Googleニュース：{}件hit".format(gnews_df.shape[0]))
 
                 st.dataframe(
@@ -90,7 +91,7 @@ def news_main() -> None:
                 time1 = "2023-12-01"#start_d
         
 
-                bingnewsdf = extract_bing_news(searchword_list,time_op=time_op)
+                bingnewsdf = extract_bing_news(searchword_list,time_op,additional_word)
                 st.write("Bingニュース：{}件hit".format(bingnewsdf.shape[0]))
                 st.dataframe(
                     bingnewsdf,
