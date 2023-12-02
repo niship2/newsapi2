@@ -90,16 +90,18 @@ def news_main() -> None:
 
                 time1 = "2023-12-01"#start_d
         
-
-                bingnewsdf = extract_bing_news(searchword_list,time_op,additional_word)
-                st.write("Bingニュース：{}件hit".format(bingnewsdf.shape[0]))
-                st.dataframe(
-                    bingnewsdf,
-                    column_config={
-                        "link": st.column_config.LinkColumn("link"),
-                    },
-                    hide_index=True,
-                )            
+                try:
+                    bingnewsdf = extract_bing_news(searchword_list,time_op,additional_word)
+                    st.write("Bingニュース：{}件hit".format(bingnewsdf.shape[0]))
+                    st.dataframe(
+                        bingnewsdf,
+                        column_config={
+                            "link": st.column_config.LinkColumn("link"),
+                        },
+                        hide_index=True,
+                    )            
+                except:
+                    st.write("エラー発生 or ヒット件数0件")
 
             
         
