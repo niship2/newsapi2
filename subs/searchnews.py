@@ -44,7 +44,7 @@ def return_period(nws,time_op):
     
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def extract_google_news(searchword_list,time_op,additional_word):
 
     time = return_period(nws="google",time_op=time_op)
@@ -106,7 +106,7 @@ def extract_google_news(searchword_list,time_op,additional_word):
 
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def get_bing_news(word,time_op,additional_word):
     # Add your Bing Search V7 subscription key and endpoint to your environment variables.
     subscription_key = st.secrets["BING_SEARCH_V7_SUBSCRIPTION_KEY"]
