@@ -97,15 +97,48 @@ def get_applicant(name):
     if name == "":
         return ["企業を検索してください"]
     else:
-        tempdf = pd.read_csv("subs/compd.zip")
-        tempdf = tempdf[
-            tempdf["name"].fillna("-").str.lower().str.contains(name.lower())
-        ]
+        query = """
+        SELECT name 
+        FROM `zuba-340305.cbdata_latest.organization_description_latest`
+        WHERE REGEXP_CONTAINS(lower(name),lower(@name))
+        """
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter("name", "STRING", name),
+            ]
+        )
 
-        return tempdf["name"].tolist()
+        dataframe = (
+            client.query(query, job_config=job_config)
+            .result()
+            .to_dataframe(
+                create_bqstorage_client=True,
+            )
+        )
+
+    return dataframe["name"].tolist()
 
 
 @st.cache_data
 def get_tag():
-    tempdf = pd.read_csv("subs/category_groups.csv")
-    return tempdf["name"].tolist()
+    name_list = ["a", "b", "c"]
+    query = """
+        SELECT name 
+        FROM `zuba-340305.crunchbasedata.category-groups`
+       
+        """
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ArrayQueryParameter("name_list", "STRING", name_list),
+        ]
+    )
+
+    dataframe = (
+        client.query(query, job_config=job_config)
+        .result()
+        .to_dataframe(
+            create_bqstorage_client=True,
+        )
+    )
+
+    return dataframe["name"].tolist()
