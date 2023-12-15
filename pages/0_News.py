@@ -8,21 +8,22 @@ import json
 import pandas as pd
 import streamlit.components.v1 as components
 
-#from GoogleNews import GoogleNews
+# from GoogleNews import GoogleNews
 from subs.searchnews import extract_google_news
 from subs.searchnews import extract_bing_news
 from subs.bigQ import get_table
 from subs.bigQ import get_taskname_list
 from subs.bigQ import get_newsletter
+from subs.bigQ import get_applicant
+from subs.bigQ import get_tag
 
+if "complist" not in st.session_state:
+    st.session_state["complist"] = [""]
 
-#if "searchword" not in st.session_state:
-#    st.session_state["searchword"] = "CO2"
-
-#if "google_newsdf" not in st.session_state:
+# if "google_newsdf" not in st.session_state:
 #    st.session_state["google_newsdf"] = pd.DataFrame()
 
-#if "bing_newsdf" not in st.session_state:
+# if "bing_newsdf" not in st.session_state:
 #    st.session_state["bing_newsdf"] = pd.DataFrame()
 
 # if "newsapi_df" not in st.session_state:
@@ -31,6 +32,7 @@ from subs.bigQ import get_newsletter
 
 def get_dates_from_today(n):
     from datetime import datetime, timedelta
+
     # 現在の日付を取得
     today = datetime.now()
     # 今日からn日前までの日付をyyyymmdd形式で出力する関数
@@ -41,56 +43,51 @@ def get_dates_from_today(n):
 
 
 def news_main() -> None:
-    
     with st.sidebar:
-        time_op = st.radio("期間指定",options=["直近24時間","直近1週間","直近2週間","直近1ヶ月"])
-
-        time_dic = {"直近24時間":1,"直近1週間":7,"直近2週間":14,"直近1ヶ月":30}
+        time_op = st.radio("期間指定", options=["直近24時間", "直近1週間", "直近2週間", "直近1ヶ月"])
+        time_dic = {"直近24時間": 1, "直近1週間": 7, "直近2週間": 14, "直近1ヶ月": 30}
         time_period = get_dates_from_today(time_dic[time_op])
 
-        #format = "%Y-%m-%d"
-        #format2 = "%m/%d/%Y"
-        #start_d = st.date_input(
-        #    "開始日", disabled=False, value=datetime.now() - timedelta(days=20)
-        #)
-        # st.write(start_d.strftime("%s"))
-        #end_d = st.date_input("終了日", disabled=False, value=datetime.now())        
-
     with st.expander("関連ニュース"):
-        task_name = st.selectbox("カテゴリ選択",["IT","energy","healthcare","material"])
+        task_name = st.selectbox("カテゴリ選択", ["IT", "energy", "healthcare", "material"])
         with st.form("サーチワード指定"):
             if task_name == "IT":
-                query = 'AI robotics OR AI semiconductor OR Generative AI OR Lidar OR 3D printing OR AI drone'
+                query = "AI robotics OR AI semiconductor OR Generative AI OR Lidar OR 3D printing OR AI drone"
             elif task_name == "energy":
-                query = 'CO2 recycle OR EV battery OR carbon foot print energy effiency OR hydrogen fuel cell'
+                query = "CO2 recycle OR EV battery OR carbon foot print energy effiency OR hydrogen fuel cell"
             elif task_name == "healthcare":
-                query = 'Wearable device OR Femtech Application OR Femtech Platform OR Wellness Application OR Wellness Platform OR Diagnosis Devices OR Medical device AI OR Healthcare digital platform OR Healthcare next generation platform'
+                query = "Wearable device OR Femtech Application OR Femtech Platform OR Wellness Application OR Wellness Platform OR Diagnosis Devices OR Medical device AI OR Healthcare digital platform OR Healthcare next generation platform"
             elif task_name == "material":
-                query = 'Biopolymer OR Synthetic OR Fermentation OR Material recycle OR Semiconductor Material OR Nanotechnology Material OR Metal OR Biomaterial OR Chemical OR construction material OR insulation material OR ammonia OR hydrogen OR magnetic OR cement material'
-        
-            all_searchword_list = query.split(" OR ")
-            searchword_list = st.multiselect("サーチワード選択",all_searchword_list,default=all_searchword_list[0])
-            additional_word = st.text_input("追加限定ワード",value='"raises"')
+                query = "Biopolymer OR Synthetic OR Fermentation OR Material recycle OR Semiconductor Material OR Nanotechnology Material OR Metal OR Biomaterial OR Chemical OR construction material OR insulation material OR ammonia OR hydrogen OR magnetic OR cement material"
 
+            all_searchword_list = query.split(" OR ")
+            searchword_list = st.multiselect(
+                "サーチワード選択", all_searchword_list, default=all_searchword_list[0]
+            )
+            additional_word = st.text_input("追加限定ワード", value='"raises"')
 
             submitted = st.form_submit_button("検索")
-            if submitted:        
-                gnews_df = extract_google_news(searchword_list,time_op,additional_word)
+            if submitted:
+                gnews_df = extract_google_news(
+                    searchword_list, time_op, additional_word
+                )
                 st.write("Googleニュース：{}件hit".format(gnews_df.shape[0]))
 
                 st.dataframe(
-                gnews_df,
-                column_config={
-                    "link": st.column_config.LinkColumn("link"),
-                },
-                hide_index=True,
-                use_container_width=True
+                    gnews_df,
+                    column_config={
+                        "link": st.column_config.LinkColumn("link"),
+                    },
+                    hide_index=True,
+                    use_container_width=True,
                 )
 
                 st.markdown("---")
-        
+
                 try:
-                    bingnewsdf = extract_bing_news(searchword_list,time_op,additional_word)
+                    bingnewsdf = extract_bing_news(
+                        searchword_list, time_op, additional_word
+                    )
                     st.write("Bingニュース：{}件hit".format(bingnewsdf.shape[0]))
                     st.dataframe(
                         bingnewsdf,
@@ -98,16 +95,19 @@ def news_main() -> None:
                             "link": st.column_config.LinkColumn("link"),
                         },
                         hide_index=True,
-                    )            
+                    )
                 except:
                     st.write("エラー発生 or ヒット件数0件")
 
-            
-        
     task_names = get_taskname_list()
-    
+
     with st.expander("スタートアップ新規資金調達情報"):
-        fund_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=["vndaily-news","news-asia-technews"],key="fund")
+        fund_task_name_list = st.multiselect(
+            "ソース選択",
+            task_names["taskname"].tolist(),
+            default=["vndaily-news", "news-asia-technews"],
+            key="fund",
+        )
         fund_df = get_table(fund_task_name_list)
         fund_df = fund_df[fund_df["pubdate"].fillna("-").str.contains(time_period)]
         st.dataframe(
@@ -116,15 +116,16 @@ def news_main() -> None:
                 "url": st.column_config.LinkColumn("url"),
             },
             hide_index=True,
-            use_container_width=True
+            use_container_width=True,
         )
-        #components.iframe("https://lookerstudio.google.com/s/qSxFC2WfMzs",height=600)
-
+        # components.iframe("https://lookerstudio.google.com/s/qSxFC2WfMzs",height=600)
 
     with st.expander("IPO,M&A情報"):
         ma_df = pd.DataFrame()
         ma_default_list = ["ma-techchurch"]
-        ma_task_name_list = st.multiselect("ソース選択",task_names["taskname"].tolist(),default=ma_default_list,key="ma")
+        ma_task_name_list = st.multiselect(
+            "ソース選択", task_names["taskname"].tolist(), default=ma_default_list, key="ma"
+        )
         ma_df = get_table(ma_task_name_list)
         ma_df = ma_df[ma_df["pubdate"].fillna("-").str.contains(time_period)]
         st.dataframe(
@@ -133,18 +134,17 @@ def news_main() -> None:
                 "url": st.column_config.LinkColumn("url"),
             },
             hide_index=True,
-            use_container_width=True
+            use_container_width=True,
         )
-
 
     with st.expander("メルマガから抽出"):
         st.write("ここに置くか含めて検討中")
         newslette_df = get_newsletter(time_period)
         sourcelist = newslette_df["sender"].unique().tolist()
-        select_source = st.multiselect("from選択",sourcelist,sourcelist[0])
-        filtered_df = (newslette_df[newslette_df["sender"].isin(select_source)]
-                       [newslette_df["received_date"].isin(time_period.split("|"))]
-                       )
+        select_source = st.multiselect("from選択", sourcelist, sourcelist[0])
+        filtered_df = newslette_df[newslette_df["sender"].isin(select_source)][
+            newslette_df["received_date"].isin(time_period.split("|"))
+        ]
 
         st.dataframe(
             filtered_df,
@@ -152,13 +152,120 @@ def news_main() -> None:
                 "url": st.column_config.LinkColumn("url"),
             },
             hide_index=True,
-            use_container_width=True
-        )        
-       
+            use_container_width=True,
+        )
 
-    #st.session_state["searchword"] = task_name
-    #st.session_state["google_newsdf"] = gnews_df
-    #st.session_state["bingnewsdf"] = bingnewsdf
+    # st.session_state["searchword"] = task_name
+    # st.session_state["google_newsdf"] = gnews_df
+    # st.session_state["bingnewsdf"] = bingnewsdf
+
+    with st.expander("ブックマークタグ　ニュース検索"):
+        all_tagname_list = get_tag()
+        with st.form("検索タグ指定"):
+            search_tag_list = st.multiselect(
+                "ブックマークタグ選択(検索可)",
+                all_tagname_list,
+                key="0_2",
+                default=all_tagname_list[0],
+                max_selections=3,
+            )
+            tag_additional_word = ""  # st.text_input("追加限定ワード", value="")
+
+            submitted = st.form_submit_button("検索")
+            if submitted:
+                try:
+                    tag_gnews_df = extract_google_news(
+                        search_tag_list, time_op, tag_additional_word
+                    )
+                    st.write("Googleニュース：{}件hit".format(tag_gnews_df.shape[0]))
+
+                    st.dataframe(
+                        tag_gnews_df,
+                        column_config={
+                            "link": st.column_config.LinkColumn("link"),
+                        },
+                        hide_index=True,
+                        use_container_width=True,
+                    )
+                except:
+                    st.write("エラー発生 or ヒット件数0件")
+
+                st.markdown("---")
+
+                try:
+                    tag_bingnewsdf = extract_bing_news(
+                        search_tag_list, time_op, tag_additional_word
+                    )
+                    st.write("Bingニュース：{}件hit".format(tag_bingnewsdf.shape[0]))
+                    st.dataframe(
+                        tag_bingnewsdf,
+                        column_config={
+                            "link": st.column_config.LinkColumn("link"),
+                        },
+                        hide_index=True,
+                    )
+                except:
+                    st.write("エラー発生 or ヒット件数0件")
+
+    with st.expander("ブックマーク企業　ニュース検索"):
+        with st.form("検索企業指定"):
+            comp_col1, comp_col2 = st.columns(2)
+            with comp_col1:
+                compname = st.text_input(
+                    label="ブックマーク企業検索(部分一致)", value="SenseTime", key="0_2_1"
+                )
+                comp_list = get_applicant(compname)
+                # comp_list = st.session_state["complist"] + comp_list
+            with comp_col2:
+                search_comp_list = st.multiselect(
+                    "ブックマーク企業選択",
+                    comp_list,
+                    key="0_1",
+                    max_selections=3,
+                    default=comp_list[0:3],
+                )
+
+            comp_additional_word = ""  # st.text_input("追加限定ワード", value="")
+
+            if st.form_submit_button("企業名でニュース検索"):
+                st.session_state["complist"] = search_comp_list
+                try:
+                    comp_gnews_df = extract_google_news(
+                        ['+"{}"'.format(cn) for cn in search_comp_list],
+                        time_op,
+                        comp_additional_word,
+                    )
+                    st.write("Googleニュース：{}件hit".format(comp_gnews_df.shape[0]))
+
+                    st.dataframe(
+                        comp_gnews_df,
+                        column_config={
+                            "link": st.column_config.LinkColumn("link"),
+                        },
+                        hide_index=True,
+                        use_container_width=True,
+                    )
+                except:
+                    st.write("エラー発生 or ヒット件数0件")
+
+                st.markdown("---")
+
+                try:
+                    comp_bingnewsdf = extract_bing_news(
+                        ['"{}"'.format(cn) for cn in search_comp_list],
+                        time_op,
+                        comp_additional_word,
+                    )
+                    st.write("Bingニュース：{}件hit".format(comp_bingnewsdf.shape[0]))
+                    st.dataframe(
+                        comp_bingnewsdf,
+                        column_config={
+                            "link": st.column_config.LinkColumn("link"),
+                        },
+                        hide_index=True,
+                    )
+                except:
+                    st.write("エラー発生 or ヒット件数0件")
 
 
 st.set_page_config(page_title="News", page_icon="📹", layout="wide")
