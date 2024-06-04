@@ -151,7 +151,7 @@ def extract_bing_news(searchword_list, time_op, additional_word):
             temp_df["link"] = temp_df["url"]
             bingnewsdf = pd.concat([bingnewsdf, temp_df])
 
-            bignewsdf["exclude"] = bignewsdf"link"].apply(exclude_site)
+            bignewsdf["exclude"] = bignewsdf["link"].apply(exclude_site)
             bingnewsdf = get_bing_news[bingnewsdf["exclude"] == True]
 
     except:
