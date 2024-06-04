@@ -6,7 +6,6 @@ from serpapi import GoogleSearch
 import streamlit as st
 
 
-
 SERPAPI_API_KEY = st.secrets["SERPAPI_API_KEY"]
 
 
@@ -18,9 +17,9 @@ def get_date_format(d):
         return str(d)
 
 
-def return_period(nws,time_op):
+def return_period(nws, time_op):
     if nws == "google":
-        if time_op=="直近24時間":
+        if time_op == "直近24時間":
             return "d1"
         elif time_op == "直近1週間":
             return "w1"
@@ -31,7 +30,7 @@ def return_period(nws,time_op):
         else:
             return "d1"
     else:
-        if time_op=="直近24時間":
+        if time_op == "直近24時間":
             return "Day"
         elif time_op == "直近1週間":
             return "Week"
@@ -41,13 +40,18 @@ def return_period(nws,time_op):
             return "Month"
         else:
             return "Day"
-    
+
+
+def exclude_site(url):
+    if "movies.yahoo.com" in url:
+        return False
+    else:
+        return True
 
 
 @st.cache_data(ttl=3600)
-def extract_google_news(searchword_list,time_op,additional_word):
-
-    time = return_period(nws="google",time_op=time_op)
+def extract_google_news(searchword_list, time_op, additional_word):
+    time = return_period(nws="google", time_op=time_op)
 
     serp_url_list = []
     wds = []
@@ -58,56 +62,55 @@ def extract_google_news(searchword_list,time_op,additional_word):
             "engine": "google",
             "q": wd + " " + additional_word,
             "google_domain": "google.com",
-            #"hl": "en",
-            "filter":1,
+            # "hl": "en",
+            "filter": 1,
             "tbm": "nws",
             "as_qdr": time,
-            "num":100,
-            
-            }
+            "num": 100,
+        }
         search = GoogleSearch(params)
         results = search.get_dict()
 
-        #urlを抽出
+        # urlを抽出
         import requests
-        #serp_url_list.append(results["search_information"]["menu_items"][0]["serpapi_link"])
+
+        # serp_url_list.append(results["search_information"]["menu_items"][0]["serpapi_link"])
         serp_url_list.append(results["search_metadata"]["json_endpoint"])
         wds.append(wd)
         try:
             for res in results["serpapi_pagination"]["other_pages"].values():
-                jsonres = requests.get(res+"&api_key=" + SERPAPI_API_KEY)
-                #print(jsonres.json()["search_metadata"]["json_endpoint"])
+                jsonres = requests.get(res + "&api_key=" + SERPAPI_API_KEY)
+                # print(jsonres.json()["search_metadata"]["json_endpoint"])
                 serp_url_list.append(jsonres.json()["search_metadata"]["json_endpoint"])
                 wds.append(wd)
         except:
-            pass   
-
+            pass
 
     gnews_df = pd.DataFrame()
     for url in serp_url_list:
-        r = requests.get(url)#+"&api_key=" + serp_api_key)
+        r = requests.get(url)  # +"&api_key=" + serp_api_key)
         res = r.json()
 
         try:
             temp_df = pd.DataFrame(res["news_results"])
             temp_df["searchword"] = res["search_information"]["query_displayed"]
-            gnews_df = pd.concat([gnews_df,temp_df])
+            gnews_df = pd.concat([gnews_df, temp_df])
         except:
             pass
 
-
-    #ちょっと整形
-    gnews_df = gnews_df.reset_index().drop(columns={"position","index"})#["pubdate","url","title","description","related_industries","related_companies","keywords"]
+    # ちょっと整形
+    gnews_df = gnews_df.reset_index().drop(
+        columns={"position", "index"}
+    )  # ["pubdate","url","title","description","related_industries","related_companies","keywords"]
     gnews_df["date"] = gnews_df["date"].apply(get_date_format)
-    #gnews_df["genre"] = task_name
-    return gnews_df[["searchword","title","link","date","source","snippet"]]
-
-
-
+    gnews_df["exclude"] = gnews_df["link"].apply(exclude_site)
+    gnews_df = gnews_df[gnews_df["exclude"] == True]
+    # gnews_df["genre"] = task_name
+    return gnews_df[["searchword", "title", "link", "date", "source", "snippet"]]
 
 
 @st.cache_data(ttl=3600)
-def get_bing_news(word,time_op,additional_word):
+def get_bing_news(word, time_op, additional_word):
     # Add your Bing Search V7 subscription key and endpoint to your environment variables.
     subscription_key = st.secrets["BING_SEARCH_V7_SUBSCRIPTION_KEY"]
     endpoint = st.secrets["BING_SEARCH_V7_ENDPOINT"]
@@ -116,11 +119,14 @@ def get_bing_news(word,time_op,additional_word):
 
     # Construct a request
     mkt = "en-US"
-    params = {"q": word + " " + additional_word, "mkt": mkt, 
-              "freshness":return_period(nws="bing",time_op=time_op),
-              #"since": time1, 
-              "count": 100,
-              "sortBy":"Date"}
+    params = {
+        "q": word + " " + additional_word,
+        "mkt": mkt,
+        "freshness": return_period(nws="bing", time_op=time_op),
+        # "since": time1,
+        "count": 100,
+        "sortBy": "Date",
+    }
     headers = {"Ocp-Apim-Subscription-Key": subscription_key}
 
     # Call the API
@@ -130,23 +136,25 @@ def get_bing_news(word,time_op,additional_word):
         return response.json()
     except Exception as ex:
         return ex
-    
 
-def extract_bing_news(searchword_list,time_op,additional_word):
+
+def extract_bing_news(searchword_list, time_op, additional_word):
     bingnewsdf = pd.DataFrame()
     try:
-        for wd in searchword_list:   
+        for wd in searchword_list:
             content = get_bing_news(
-            word=wd,
-            time_op=time_op,
-            additional_word=additional_word
+                word=wd, time_op=time_op, additional_word=additional_word
             )
             temp_df = pd.DataFrame(content["value"])
             temp_df["searchword"] = wd + " " + additional_word
             temp_df["title"] = temp_df["name"]
             temp_df["link"] = temp_df["url"]
-            bingnewsdf = pd.concat([bingnewsdf,temp_df])
+            bingnewsdf = pd.concat([bingnewsdf, temp_df])
+
+            bignewsdf["exclude"] = bignews["link"].apply(exclude_site)
+            bingnewsdf = get_bing_news[bingnewsdf["exclude"] == True]
+
     except:
         pass
 
-    return bingnewsdf[["searchword","title","link","description","datePublished"]]
+    return bingnewsdf[["searchword", "title", "link", "description", "datePublished"]]
