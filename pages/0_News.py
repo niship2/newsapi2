@@ -160,5 +160,5 @@ def news_main() -> None:
     # st.session_state["bingnewsdf"] = bingnewsdf
 
 
-st.set_page_config(page_title="News", page_icon="📹", layout="wide")
+st.set_page_config(page_title="New", page_icon="📹", layout="wide")
 news_main()
