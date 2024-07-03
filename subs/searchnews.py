@@ -43,7 +43,7 @@ def return_period(nws, time_op):
 
 
 def exclude_site(url):
-    if "movies.yahoo.com" in url:
+    if "yahoo" in url:
         return False
     else:
         return True
