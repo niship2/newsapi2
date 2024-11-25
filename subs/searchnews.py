@@ -152,7 +152,7 @@ def extract_bing_news(searchword_list, time_op, additional_word):
             bingnewsdf = pd.concat([bingnewsdf, temp_df])
 
             bingnewsdf["exclude"] = bingnewsdf["link"].apply(exclude_site)
-            bingnewsdf = get_bing_news[bingnewsdf["exclude"] == True]
+            bingnewsdf = bingnewsdf[bingnewsdf["exclude"] == True]
 
     except:
         pass

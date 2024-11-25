@@ -16,6 +16,8 @@ from subs.bigQ import get_taskname_list
 from subs.bigQ import get_newsletter
 from subs.bigQ import get_applicant
 from subs.bigQ import get_tag
+from subs.youcomsearch import get_news_snippets_for_query
+from subs.youcomsearch import get_llm_answer
 
 if "complist" not in st.session_state:
     st.session_state["complist"] = [""]
@@ -52,19 +54,19 @@ def news_main() -> None:
         task_name = st.selectbox("カテゴリ選択", ["IT", "energy", "healthcare", "material"])
         with st.form("サーチワード指定"):
             if task_name == "IT":
-                query = "AI robotics OR AI semiconductor OR Generative AI OR Lidar OR 3D printing OR AI drone"
+                query = "AI robotics OR AI semiconductor OR Generative AI OR Lidar OR 3D printing OR AI drone OR Digital Labor OR AI OR blockchain OR quantum computing OR GPU OR fully autonomous robot OR construction monitoring"
             elif task_name == "energy":
-                query = "CO2 recycle OR EV battery OR carbon foot print energy effiency OR hydrogen fuel cell"
+                query = "CO2 recycle OR EV battery OR carbon foot print energy effiency OR hydrogen fuel cell OR solar power OR nuclear microreactor OR decarbonization OR nuclear power OR battery OR methane"
             elif task_name == "healthcare":
-                query = "Wearable device OR Femtech Application OR Femtech Platform OR Wellness Application OR Wellness Platform OR Diagnosis Devices OR Medical device AI OR Healthcare digital platform OR Healthcare next generation platform"
+                query = "Wearable device OR Femtech Application OR Femtech Platform OR Wellness Application OR Wellness Platform OR Diagnosis Devices OR Medical device AI OR Healthcare digital platform OR Healthcare next generation platform OR longivity OR aging OR therapy OR psychedelic OR genetic"
             elif task_name == "material":
-                query = "Biopolymer OR Synthetic OR Fermentation OR Material recycle OR Semiconductor Material OR Nanotechnology Material OR Metal OR Biomaterial OR Chemical OR construction material OR insulation material OR ammonia OR hydrogen OR magnetic OR cement material"
+                query = "Biopolymer OR Synthetic OR Fermentation OR Material recycle OR Semiconductor Material OR Nanotechnology Material OR Metal OR Biomaterial OR Chemical OR construction material OR insulation material OR ammonia OR hydrogen OR magnetic OR cement material OR waste recycling OR photonics OR optical"
 
             all_searchword_list = query.split(" OR ")
             searchword_list = st.multiselect(
                 "サーチワード選択", all_searchword_list, default=all_searchword_list[0]
             )
-            additional_word = st.text_input("追加限定ワード", value='"raises"')
+            additional_word = st.text_input('追加限定ワード(" "は完全一致指定)', value='"raises"')
 
             submitted = st.form_submit_button("検索")
             if submitted:
@@ -136,6 +138,16 @@ def news_main() -> None:
             hide_index=True,
             use_container_width=True,
         )
+
+    with st.expander("youcomで抽出"):
+        select = st.selectbox("", ["ニュース記事検索", "web記事検索"])
+        if select == "ニュース記事検索":
+            results = get_news_snippets_for_query("".join(searchword_list))
+            st.write(results)
+
+        if select == "web情報から要約生成":
+            results = get_llm_answer("".join(searchword_list))
+            st.write(results)
 
     with st.expander("メルマガから抽出"):
         st.write("ここに置くか含めて検討中")
