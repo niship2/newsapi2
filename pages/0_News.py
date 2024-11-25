@@ -60,7 +60,7 @@ def news_main() -> None:
             elif task_name == "healthcare":
                 query = "Wearable device OR Femtech Application OR Femtech Platform OR Wellness Application OR Wellness Platform OR Diagnosis Devices OR Medical device AI OR Healthcare digital platform OR Healthcare next generation platform OR longivity OR aging OR therapy OR psychedelic OR genetic"
             elif task_name == "material":
-                query = "Biopolymer OR Synthetic OR Fermentation OR Material recycle OR Semiconductor Material OR Nanotechnology Material OR Metal OR Biomaterial OR Chemical OR construction material OR insulation material OR ammonia OR hydrogen OR magnetic OR cement material OR waste recycling OR photonics OR optical"
+                query = "Biopolymer OR Synthetic OR Fermentation OR Material recycle OR Semiconductor Material OR Nanotechnology Material OR Metal OR Biomaterial OR Chemical OR construction material OR insulation material OR ammonia OR hydrogen OR magnetic OR cement material OR waste OR recycling OR photonics OR optical"
 
             all_searchword_list = query.split(" OR ")
             searchword_list = st.multiselect(
@@ -139,13 +139,23 @@ def news_main() -> None:
             use_container_width=True,
         )
 
-    with st.expander("youcomで抽出"):
+    with st.expander("youcomで抽出（未完成）"):
         select = st.selectbox("", ["ニュース記事検索", "web記事検索"])
         if select == "ニュース記事検索":
             results = get_news_snippets_for_query("".join(searchword_list))
-            st.write(results)
+            # st.write(results)
+            article_list = []
+            for res in results["news"]["results"]:
+                article_list.append(
+                    [res["title"], res["age"], res["url"], res["description"]]
+                )
+            st.write(
+                pd.DataFrame(
+                    article_list, columns=["title", "age", "url", "description"]
+                )
+            )
 
-        if select == "web情報から要約生成":
+        if select == "web情報から要約生成2":
             results = get_llm_answer("".join(searchword_list))
             st.write(results)
 
